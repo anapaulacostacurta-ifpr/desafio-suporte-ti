@@ -61,4 +61,63 @@ document.addEventListener("DOMContentLoaded", carregarRanking);
       );
     });
 }
+/*
+ function carregarRankingAtividade() {
+  const csvPath = `${location.origin}/desafio-suporte-ti/assets/ranking_geral_atividade.csv`;
 
+  fetch(csvPath)
+    .then(response => {
+      if (!response.ok) throw new Error('Erro ao carregar o arquivo CSV');
+      return response.text();
+    })
+    .then(data => {
+      const lines = data.split('\n').map(line => line.trim()).filter(line => line !== '');
+      let tbody = document.querySelector('#rankingTable tbody');
+      if (!tbody) {
+        tbody = document.createElement('tbody');
+        document.querySelector('#rankingTable').appendChild(tbody);
+      }
+      tbody.innerHTML = ''; // Limpa conteúdo anterior
+
+      // Converte o CSV em um array de objetos com total calculado
+      const ranking = lines.map(line => {
+        const IFPRPoints = line.split(',').map(val => val.trim());
+        const total_calculado = 0; 
+        IFPRPoints.array.forEach(IFPRPoint => {
+          total_calculado = total_calculado + (parseInt(IFPRPoint || 0));
+        });
+          
+      
+        return IFPRPoints;
+      });
+
+      // Monta cada linha da tabela
+      ranking.forEach((aluno, index) => {
+        var foguinho = index < 3 ? ' 🔥' : ''; // Top 3 com fogo
+        const isPrimeiroLugar = index === 0;
+        const row = document.createElement('tr');
+
+        // Se for o primeiro colocado, aplica estilo especial
+        if (isPrimeiroLugar) {
+          //foguinho = '🥇';
+          row.style.backgroundColor = '#fff8e1'; // fundo amarelo claro
+          row.style.fontWeight = 'bold';
+        }
+
+        row.innerHTML = `
+          <td>${aluno.email}</td>
+          <td>${aluno.nome}</td>
+          <td>${aluno.email_padrao}</td>
+          <td>${aluno.foto}</td>
+          <td class="highlight">${aluno.total_calculado}${foguinho}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    })
+    .catch(error => {
+      console.error('Erro ao processar o CSV:', error);
+      document.querySelector('#rankingTable').insertAdjacentHTML(
+        'afterend',
+        `<p style="color: red;">❌ Erro ao carregar os dados do ranking. Verifique o caminho do arquivo CSV.</p>`
+      );
+    });*/
