@@ -44,6 +44,7 @@ document.addEventListener("DOMContentLoaded", carregarRanking);
         }
 
         row.innerHTML = `
+          <td>${index}</td>
           <td>${aluno.email}</td>
           <td>${aluno.nome}</td>
           <td>${aluno.email_padrao}</td>
