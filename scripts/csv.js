@@ -1,0 +1,63 @@
+ 
+ // Função chamada automaticamente quando o script é carregado
+document.addEventListener("DOMContentLoaded", carregarRanking);
+
+ function carregarRanking() {
+  const csvPath = `${location.origin}/desafio-suporte-ti/assets/ranking_geral.csv`;
+
+  fetch(csvPath)
+    .then(response => {
+      if (!response.ok) throw new Error('Erro ao carregar o arquivo CSV');
+      return response.text();
+    })
+    .then(data => {
+      const lines = data.split('\n').map(line => line.trim()).filter(line => line !== '');
+      let tbody = document.querySelector('#rankingTable tbody');
+      if (!tbody) {
+        tbody = document.createElement('tbody');
+        document.querySelector('#rankingTable').appendChild(tbody);
+      }
+      tbody.innerHTML = ''; // Limpa conteúdo anterior
+
+      // Converte o CSV em um array de objetos com total calculado
+      const ranking = lines.map(line => {
+        const [email, nome, email_padrao, foto, total] = line.split(',').map(val => val.trim());
+        const total_calculado = (parseInt(nome) || 0) + (parseInt(email_padrao) || 0) + (parseInt(foto) || 0);
+        console.log(total)
+        return { email, nome, email_padrao, foto, total_calculado, total };
+      });
+
+      // Ordena do maior para o menor total
+      //ranking.sort((a, b) => b.total_calculado - a.total_calculado);
+
+      // Monta cada linha da tabela
+      ranking.forEach((aluno, index) => {
+        var foguinho = index < 3 ? ' 🔥' : ''; // Top 3 com fogo
+        const isPrimeiroLugar = index === 0;
+        const row = document.createElement('tr');
+
+        // Se for o primeiro colocado, aplica estilo especial
+        if (isPrimeiroLugar) {
+          //foguinho = '🥇';
+          row.style.backgroundColor = '#fff8e1'; // fundo amarelo claro
+          row.style.fontWeight = 'bold';
+        }
+
+        row.innerHTML = `
+          <td>${aluno.email}</td>
+          <td>${aluno.nome}</td>
+          <td>${aluno.email_padrao}</td>
+          <td>${aluno.foto}</td>
+          <td class="highlight">${aluno.total_calculado}${foguinho}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    })
+    .catch(error => {
+      console.error('Erro ao processar o CSV:', error);
+      document.querySelector('#rankingTable').insertAdjacentHTML(
+        'afterend',
+        `<p style="color: red;">❌ Erro ao carregar os dados do ranking. Verifique o caminho do arquivo CSV.</p>`
+      );
+    });
+}
