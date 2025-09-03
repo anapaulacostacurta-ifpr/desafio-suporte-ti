@@ -21,10 +21,10 @@ document.addEventListener("DOMContentLoaded", carregarRanking);
 
       // Converte o CSV em um array de objetos com total calculado
       const ranking = lines.map(line => {
-        const [email, nome, email_padrao, foto, total] = line.split(',').map(val => val.trim());
+        const [email, nickname, nome, email_padrao, foto, total] = line.split(',').map(val => val.trim());
         const total_calculado = (parseInt(nome) || 0) + (parseInt(email_padrao) || 0) + (parseInt(foto) || 0);
         console.log(total)
-        return { email, nome, email_padrao, foto, total_calculado, total };
+        return { email, nickname, nome, email_padrao, foto, total_calculado, total };
       });
 
       // Ordena do maior para o menor total
@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", carregarRanking);
 
         row.innerHTML = `
           <td>${index}</td>
-          <td>${aluno.email}</td>
+          <td>${aluno.nickname}</td>
           <td>${aluno.nome}</td>
           <td>${aluno.email_padrao}</td>
           <td>${aluno.foto}</td>
