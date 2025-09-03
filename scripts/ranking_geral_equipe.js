@@ -3,7 +3,7 @@
 document.addEventListener("DOMContentLoaded", carregarRanking);
 
  function carregarRanking() {
-  const csvPath = `${location.origin}/desafio-suporte-ti/assets/ranking_geral_equipe.csv`;
+  const csvPath = `${location.origin}/desafio-suporte-ti/assets/ranking_equipe.csv`;
 
   fetch(csvPath)
     .then(response => {
