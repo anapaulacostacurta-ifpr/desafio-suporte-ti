@@ -3,7 +3,7 @@
 document.addEventListener("DOMContentLoaded", carregarRanking);
 
  function carregarRanking() {
-  const csvPath = `${location.origin}/desafio-suporte-ti/assets/ranking_geral.csv`;
+  const csvPath = `${location.origin}/desafio-suporte-ti/assets/ranking_geral_equipe.csv`;
 
   fetch(csvPath)
     .then(response => {
@@ -21,17 +21,17 @@ document.addEventListener("DOMContentLoaded", carregarRanking);
 
       // Converte o CSV em um array de objetos com total calculado
       const ranking = lines.map(line => {
-        const [email, nickname, nome, email_padrao, foto, avatar, total] = line.split(',').map(val => val.trim());
-        const total_calculado = (parseFloat(nome) || 0) + (parseFloat(email_padrao) || 0) + (parseFloat(foto) || 0) + + (parseFloat(suporte) || 0) + + (parseFloat(proposta) || 0) + + (parseFloat(avatar) || 0);
+        const [nome, ativ1, ativ2, ativ3, total] = line.split(',').map(val => val.trim());
+        const total_calculado = (parseFloat(ativ1) + (parseFloat(ativ2) || 0) + (parseFloat(ativ3) || 0));
         console.log(total)
-        return { email, nickname, nome, email_padrao, foto, avatar,total_calculado, total };
+        return {nome, ativ1,ativ2,ativ3,total_calculado, total };
       });
 
       // Ordena do maior para o menor total
       //ranking.sort((a, b) => b.total_calculado - a.total_calculado);
       var total_geral = 0;
       // Monta cada linha da tabela
-      ranking.forEach((aluno, index) => {
+      ranking.forEach((equipe, index) => {
         var foguinho = index < 3 ? ' 🔥' : ''; // Top 3 com fogo
         const isPrimeiroLugar = index === 0;
         const row = document.createElement('tr');
@@ -45,15 +45,14 @@ document.addEventListener("DOMContentLoaded", carregarRanking);
 
         row.innerHTML = `
           <td>${index}</td>
-          <td><img src="./images/avatar/${aluno.nickname}.png" alt="Avatar"> <br> ${aluno.nickname}</td>
-          <td>${aluno.nome}</td>
-          <td>${aluno.email_padrao}</td>
-          <td>${aluno.foto}</td>
-          <td>${aluno.avatar}</td>
-          <td class="highlight">${aluno.total_calculado}${foguinho}</td>
+          <td><img src="./images/avatar/${equipe.nome}.png" alt="Avatar"> <br> ${equipe.nome}</td>
+          <td>${equipe.ativ1}</td>
+          <td>${equipe.ativ2}</td>
+          <td>${equipe.ativ3}</td>
+          <td class="highlight">${equipe.total_calculado}${foguinho}</td>
         `;
         tbody.appendChild(row);
-        total_geral = total_geral + aluno.total_calculado;
+        total_geral = total_geral + equipe.total_calculado;
       });
       const row2 = document.createElement('tr')
       row2.innerHTML = `<td colspan="8">Total Geral</td><td>${total_geral}</td>`;
