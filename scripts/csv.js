@@ -22,14 +22,14 @@ document.addEventListener("DOMContentLoaded", carregarRanking);
       // Converte o CSV em um array de objetos com total calculado
       const ranking = lines.map(line => {
         const [email, nickname, nome, email_padrao, foto, suporte, proposta, avatar, total] = line.split(',').map(val => val.trim());
-        const total_calculado = (parseInt(nome) || 0) + (parseInt(email_padrao) || 0) + (parseInt(foto) || 0) + + (parseInt(suporte) || 0) + + (parseInt(proposta) || 0) + + (parseInt(avatar) || 0);
+        const total_calculado = (parseFloat(nome) || 0) + (parseFloat(email_padrao) || 0) + (parseFloat(foto) || 0) + + (parseFloat(suporte) || 0) + + (parseFloat(proposta) || 0) + + (parseFloat(avatar) || 0);
         console.log(total)
         return { email, nickname, nome, email_padrao, foto, suporte, proposta, avatar,total_calculado, total };
       });
 
       // Ordena do maior para o menor total
       //ranking.sort((a, b) => b.total_calculado - a.total_calculado);
-      var total_geral = 0.0;
+      var total_geral = 0;
       // Monta cada linha da tabela
       ranking.forEach((aluno, index) => {
         var foguinho = index < 3 ? ' 🔥' : ''; // Top 3 com fogo
