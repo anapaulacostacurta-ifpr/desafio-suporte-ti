@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", carregarRanking);
 
         row.innerHTML = `
           <td>${index}</td>
-          <td>${aluno.nickname}</td>
+          <td>${aluno.email} - ${aluno.nickname}</td>
           <td>${aluno.nome}</td>
           <td>${aluno.email_padrao}</td>
           <td>${aluno.foto}</td>
