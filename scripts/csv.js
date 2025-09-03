@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", carregarRanking);
 
       // Ordena do maior para o menor total
       //ranking.sort((a, b) => b.total_calculado - a.total_calculado);
-
+      var total_geral = 0;
       // Monta cada linha da tabela
       ranking.forEach((aluno, index) => {
         var foguinho = index < 3 ? ' 🔥' : ''; // Top 3 com fogo
