@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", carregarRanking);
       // Converte o CSV em um array de objetos com total calculado
       const ranking = lines.map(line => {
         const [email, nickname, nome, email_padrao, foto, avatar, total] = line.split(',').map(val => val.trim());
-        const total_calculado = (parseFloat(nome) || 0) + (parseFloat(email_padrao) || 0) + (parseFloat(foto) || 0) + (parseFloat(suporte) || 0) + (parseFloat(proposta) || 0) + (parseFloat(avatar) || 0);
+        const total_calculado = (parseFloat(nome) || 0) + (parseFloat(email_padrao) || 0) + (parseFloat(foto) || 0) + (parseFloat(avatar) || 0);
         console.log(total)
         return { email, nickname, nome, email_padrao, foto, avatar,total_calculado, total };
       });
