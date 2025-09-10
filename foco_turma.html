@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="pt-br">
+    <head>
+        <meta charset="utf-8">
+        <title>Registro de Ocorrências — Gamificação do Foco</title>
+        <!-- 1) Aponte para o CSS do seu repositório (substitua a URL abaixo pela folha real) -->
+        <link rel="stylesheet" href="./assets/css/style.css">
+    </head>
+    <body>
+    <div class="container">
+        <div class="header">
+        <h1>Registro de Ocorrências</h1>
+        <p class="sub">Gamificação do foco em sala — INF1, INF2, INF3, INF4</p>
+        </div>
+        <!-- Configurações (persistem no navegador) -->
+        <div class="card">
+        <div class="grid">
+            <div>
+            <label for="scriptUrl">Script URL (Apps Script — termina com <code>/exec</code>)</label>
+            <input id="scriptUrl" type="url" placeholder="https://script.google.com/a/macros/ifpr.edu.br/s/AKfycbyTlML5fSr1QiWvORI1_vQjw5npJ8TB7kwn2kORkE-PKvdHiCW5AKyG7BIg3DzPiP4Mtg/exec" required>
+            <div class="help">Cole aqui a URL pública do seu Web App (Apps Script &rarr; Implantar &rarr; App da Web).</div>
+            </div>
+            <div>
+            <label for="token">Token de segurança</label>
+            <input id="token" type="password" placeholder="ex.: 1234" required>
+            <div class="help">Altere o token semanalmente e atualize os QRs/cartaz.</div>
+            </div>
+            <div>
+            <label for="monitor">Monitor / Professor</label>
+            <input id="monitor" type="text" placeholder="ex.: Ana" required>
+            <div class="help">Identificação de quem registrou (aparece no log).</div>
+            </div>
+            <div class="row">
+            <button class="btn outline small" id="saveCfg">Salvar preferências</button>
+            <span class="badge" id="cfgStatus">Config não salva</span>
+            </div>
+        </div>
+        </div>
+
+        <!-- Registro -->
+        <div class="card">
+        <div class="grid grid-2">
+            <div>
+            <label for="turma">Turma</label>
+            <select id="turma">
+                <option value="INF1">INF1</option>
+                <option value="INF2">INF2</option>
+            </select>
+            </div>
+            <div>
+            <label for="acao">Ação</label>
+            <select id="acao">
+                <option value="uso_inadequado">Uso inadequado de celular (−5)</option>
+                <option value="uso_inadequado">Jogando durante a aula (−5)</option>
+                <option value="multi_uso">Uso simultâneo (&ge;3) (−10)</option>
+                <option value="foco_turma">Foco da turma (+5)</option>
+            </select>
+            </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="actions">
+            <button class="btn warn" data-quick="uso_inadequado">Registrar “Uso inadequado”</button>
+            <button class="btn warn" data-quick="multi_uso">Registrar “Uso simultâneo (≥3)”</button>
+            <button class="btn ok" data-quick="foco_turma">Registrar “Foco da turma”</button>
+            <button class="btn outline" id="limpar">Limpar</button>
+        </div>
+
+        <div class="kpis">
+            <span class="badge">Último status: <span id="status">—</span></span>
+            <span class="badge">Resposta: <span id="resp" class="small">—</span></span>
+        </div>
+        </div>
+
+        <!-- Links/QR prontos (dinâmicos) -->
+        <div class="card">
+        <legend>QR Codes dinâmicos (para cartaz)</legend>
+        <div class="grid grid-2">
+            <div>
+            <label>Link “Uso inadequado” (turma atual)</label>
+            <input id="linkUso" type="text" readonly>
+            <div class="help">Cole no gerador de QR (ou use a imagem abaixo).</div>
+            <img id="qrUso" alt="QR Uso" style="margin-top:8px;max-width:240px;border:1px solid var(--border);border-radius:8px;">
+            </div>
+            <div>
+            <label>Link “Foco da turma” (turma atual)</label>
+            <input id="linkFoco" type="text" readonly>
+            <div class="help">Para seu cartaz A4 por turma.</div>
+            <img id="qrFoco" alt="QR Foco" style="margin-top:8px;max-width:240px;border:1px solid var(--border);border-radius:8px;">
+            </div>
+        </div>
+        </div>
+
+        <p class="small" style="color:var(--muted)">
+        Dica: publique a aba <b>Pontuacao_Semanal</b> (somente leitura) como mural digital. Logs: <b>Ocorrencias</b>.
+        </p>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">Mensagem</div>
+
+    <script>
+    (function(){
+    const $ = s => document.querySelector(s);
+    const scriptUrl = $('#scriptUrl');
+    const token = $('#token');
+    const monitor = $('#monitor');
+    const turma = $('#turma');
+    const acao = $('#acao');
+    const statusEl = $('#status');
+    const respEl = $('#resp');
+    const toast = $('#toast');
+    const cfgStatus = $('#cfgStatus');
+    const linkUso = $('#linkUso');
+    const linkFoco = $('#linkFoco');
+    const qrUso = $('#qrUso');
+    const qrFoco = $('#qrFoco');
+
+    // Persistência
+    const loadCfg = () => {
+        scriptUrl.value = localStorage.getItem('g_scriptUrl') || '';
+        token.value = localStorage.getItem('g_token') || '';
+        monitor.value = localStorage.getItem('g_monitor') || '';
+        cfgStatus.textContent = (scriptUrl.value && token.value) ? 'Config carregada' : 'Config não salva';
+    };
+    const saveCfg = () => {
+        localStorage.setItem('g_scriptUrl', scriptUrl.value.trim());
+        localStorage.setItem('g_token', token.value.trim());
+        localStorage.setItem('g_monitor', monitor.value.trim());
+        cfgStatus.textContent = 'Config salva';
+        showToast('Configurações salvas.');
+        updateLinks();
+    };
+
+    // Construção de URL
+    const buildUrl = (a=null) => {
+        const base = (scriptUrl.value || '').trim();
+        if(!base) return '';
+        const params = new URLSearchParams({
+        turma: turma.value,
+        acao: a || acao.value,
+        monitor: monitor.value || 'prof',
+        token: token.value
+        });
+        return base + (base.includes('?') ? '&' : '?') + params.toString();
+    };
+
+    // QR (Google Chart)
+    const qrFrom = (url) =>
+        'https://chart.googleapis.com/chart?cht=qr&chs=300x300&chl=' + encodeURIComponent(url);
+
+    const updateLinks = () => {
+        const urlUso = buildUrl('uso_inadequado');
+        const urlFoco = buildUrl('foco_turma');
+        linkUso.value = urlUso;
+        linkFoco.value = urlFoco;
+        qrUso.src = urlUso ? qrFrom(urlUso) : '';
+        qrFoco.src = urlFoco ? qrFrom(urlFoco) : '';
+    };
+
+    const showToast = (msg) => {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(()=>toast.classList.remove('show'), 2600);
+    };
+
+    const registrar = async (acaoName) => {
+        const url = buildUrl(acaoName);
+        if(!url){ showToast('Configure a Script URL primeiro.'); return; }
+        statusEl.textContent = 'Enviando…';
+        respEl.textContent = '—';
+        try{
+        const r = await fetch(url, { method:'GET', mode:'cors' });
+        const text = await r.text();
+        statusEl.textContent = r.ok ? 'Sucesso' : 'Falhou';
+        respEl.textContent = text.slice(0, 180);
+        showToast(r.ok ? 'Registro enviado.' : 'Falha no envio.');
+        }catch(err){
+        statusEl.textContent = 'Erro';
+        respEl.textContent = String(err).slice(0, 180);
+        showToast('Erro de rede.');
+        }
+    };
+
+    // Eventos
+    $('#saveCfg').addEventListener('click', saveCfg);
+    $('#limpar').addEventListener('click', () => { respEl.textContent='—'; statusEl.textContent='—'; });
+    document.querySelectorAll('[data-quick]').forEach(btn=>{
+        btn.addEventListener('click', () => registrar(btn.dataset.quick));
+    });
+    turma.addEventListener('change', updateLinks);
+    monitor.addEventListener('change', updateLinks);
+    token.addEventListener('change', updateLinks);
+    scriptUrl.addEventListener('change', updateLinks);
+    acao.addEventListener('change', ()=>{}); // só para consistência visual
+
+    // Init
+    loadCfg();
+    updateLinks();
+    })();
+    </script>
+    </body>
+</html>
